@@ -7,6 +7,8 @@ function Book (title, author, pages, year, read = false) {
     this.pages = pages;
     this.year = year;
     this.read = read;
+
+    //Add unique identifier
 };
 
 myLibrary.push(new Book("A Master of Djinn", "P.Djeli Clark", 356, 2000, false));
@@ -78,7 +80,7 @@ function addBookToDoom(book, index) {
 
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete Book";
-    deleteButton.setAttribute("value", index);
+    deleteButton.setAttribute("value", book_title);
     deleteButton.setAttribute("name", "deleteBtn");
     deleteButton.classList.add("deleteBtn");
 
@@ -122,23 +124,28 @@ function updateDelBook() { // Required so we can update the event listener to al
     const deleteBtn = document.getElementsByName("deleteBtn");
 
     for (const button of deleteBtn) {
-        button.addEventListener("click", () => {
-            myLibrary.splice(+button.getAttribute("value"), 1); //Delete the node in the myLibrary array of Books objects
-            console.log(myLibrary);
-            const deleteDiv = document.getElementById(button.getAttribute("value")); //Select the div to delete
-            console.log(deleteDiv);
-            document.getElementsByClassName("shelve")[0].removeChild(deleteDiv); //Delete div from the DOM tree
-            alert("Book deleted successfully")
+        if (!button.hasAttribute("anexed")) { //This check an attribute used to avoid adding double event listeners (when pre-existing library is anexed and a book is created)
+            button.setAttribute("anexed", true);
+            button.addEventListener("click", (event) => {
+                const deleteDiv = event.target.parentNode;
+                document.getElementsByClassName("shelve")[0].removeChild(deleteDiv);
 
-            console.log("Book deleted successfully");
-        })
+                // myLibrary.splice(+button.getAttribute("value"), 1); //Delete the node in the myLibrary array of Books objects
+                // console.log(myLibrary);
+                // const deleteDiv = document.getElementById(button.getAttribute("value")); //Select the div to delete
+                // console.log(deleteDiv);
+                alert("Book deleted successfully")
+                // console.log("Book deleted successfully");
+            });
+        };
+
     };
 };
 
 // Add Event Listeners to all the "read?"" options
 function updateReadOpt() {
     for (const option of selectOptions) {
-        if (!option.hasAttribute("anexed")) { //This check and attribute is used to avoid add double event listeners (when pre-existing library is anexed and a book is created)
+        if (!option.hasAttribute("anexed")) { //This check an attribute used to avoid adding double event listeners (when pre-existing library is anexed and a book is created)
             option.addEventListener("change", (event) => {
                 myLibrary[event.target.getAttribute("index")].markAsRead();
                 event.target.setAttribute("anexed", "yes");
