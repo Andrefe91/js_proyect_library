@@ -10,14 +10,35 @@
     <dialog>
         <h2>Adding a Book to the Shelve</h2>
 
-        <button autofocus type="button">Close</button>
+        <form method="dialog">
+            <label for="">Title: </label>
+            <input type="text" id="title" name="title" placeholder="Title">
+
+            <label for="author">Author: </label>
+            <input type="text" id="author" name="author" placeholder="Author">
+
+            <label for="pages">Pages: </label>
+            <input type="number" id="pages" name="pages" placeholder="Pages">
+
+            <label for="year">Year: </label>
+            <input type="number" id="year" name="year" placeholder="Year">
+
+            <label for="read">Read?:
+                <select name="read" id="read">
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                </select>
+            </label>
+
+            <button id="confirmBtn" value="addBook">Add Book</button>
+        </form>
+
+        <button autofocus type="button" id="closeBtn">Close</button>
     </dialog>
-
-
 
     <div class="container">
         <h1>My Book Shelve</h1>
-        <button id="addBook">Add Book to the shelve</button>
+        <button id="addBook">Add Book: </button>
 
         <section class="shelve">
 
