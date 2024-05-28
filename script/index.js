@@ -1,9 +1,6 @@
 // Basic variables definitions
 const myLibrary = [];
 
-myLibrary.push({title: "A Master of Djinn", author: "P.Djeli Clark", pages: 356, year: 2000});
-myLibrary.push({title: "The Club Dumas", author: "Arturo Perez", pages: 225, year: 1998});
-
 function Book (title, author, pages, year, read = false) {
     this.title = title;
     this.author = author;
@@ -12,14 +9,30 @@ function Book (title, author, pages, year, read = false) {
     this.read = read;
 };
 
+myLibrary.push(new Book("A Master of Djinn", "P.Djeli Clark", 356, 2000, false));
+myLibrary.push(new Book("The Club Dumas", "Arturo Perez", 225, 1998, false));
+
+Book.prototype.markAsRead =  function(){
+    this.read  = this.read === false ? true : false;
+
+    this.read === true ? alert("Excelent !!, well done!") : alert("In due time!");
+};
+
+// Web Page JavaScript Selections
+
+const dialog = document.querySelector("dialog");
+const showButton = document.getElementById("addBook");
+const closeButton = dialog.querySelector("#closeBtn");
+const confirmButton = dialog.querySelector("#confirmBtn");
+const selectOptions = document.getElementsByName("selectOptions");
+
 // Add to the doom tree
 function addBookToDoom(book, index) {
     book_title = book["title"];
     book_author = book["author"];
     book_pages = book["pages"];
     book_year = book["year"];
-
-    book_read = book["read"]? "Yes" : "No";
+    book_read = book["read"];
 
     const shelve = document.getElementsByClassName("shelve")[0]; // HTMLCollection array, we only want the first element
 
@@ -40,14 +53,39 @@ function addBookToDoom(book, index) {
     const year = document.createElement("p");
     year.textContent = `Year: ${book_year}`;
 
-    const read = document.createElement("p");
-    read.textContent = `Readed?: ${book_read}`;
+    const read = document.createElement("label");
+    read.setAttribute("for", "read");
+    read.textContent = "Read?: ";
 
+    const readOption = document.createElement("select");
+    readOption.setAttribute("name", "selectOptions");
+    readOption.setAttribute("index", index);
+
+    const yesRead = document.createElement("option");
+    yesRead.setAttribute("value", "Yes");
+    yesRead.textContent = "Yes";
+
+    const noRead = document.createElement("option");
+    noRead.setAttribute("value", "No");
+    noRead.textContent = "No";
+
+    // To select the correct option
+    if (book_read === false) {
+        noRead.setAttribute("selected", "selected");
+    } else {
+        yesRead.setAttribute("selected", "selected");
+    };
 
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete Book";
     deleteButton.setAttribute("value", index);
+    deleteButton.setAttribute("name", "deleteBtn");
     deleteButton.classList.add("deleteBtn");
+
+    read.appendChild(readOption);
+    readOption.appendChild(yesRead);
+    readOption.appendChild(noRead);
+
 
     div.appendChild(title);
     div.appendChild(author);
@@ -60,11 +98,11 @@ function addBookToDoom(book, index) {
 };
 
 // Logic function to add to the library
-
 function addBookToLibrary(title, author, pages, year, read) {
     myLibrary.push(new Book(title, author, pages, year, read)); // Add to library
     addBookToDoom(myLibrary.slice(-1)[0],myLibrary.length-1); // Add to doom
     updateDelBook(); // Updates the event listeners for the delete button created
+    updateReadOpt(); // Creates the read event listeners
 };
 
 // Initialize addition to doom tree from preexisting library
@@ -76,15 +114,41 @@ function addBookToLibrary(title, author, pages, year, read) {
     );
 
     updateDelBook(); // Creates the delete button event listener
+    updateReadOpt(); // Creates the read event listeners
 })(); // Immediately Invoked Function Expression
 
+// To Delete a Book
+function updateDelBook() { // Required so we can update the event listener to all the created buttons
+    const deleteBtn = document.getElementsByName("deleteBtn");
 
-// Web Page interaction logic
+    for (const button of deleteBtn) {
+        button.addEventListener("click", () => {
+            myLibrary.splice(+button.getAttribute("value"), 1); //Delete the node in the myLibrary array of Books objects
+            console.log(myLibrary);
+            const deleteDiv = document.getElementById(button.getAttribute("value")); //Select the div to delete
+            console.log(deleteDiv);
+            document.getElementsByClassName("shelve")[0].removeChild(deleteDiv); //Delete div from the DOM tree
+            alert("Book deleted successfully")
 
-const dialog = document.querySelector("dialog");
-const showButton = document.getElementById("addBook");
-const closeButton = dialog.querySelector("#closeBtn");
-const confirmButton = dialog.querySelector("#confirmBtn");
+            console.log("Book deleted successfully");
+        })
+    };
+};
+
+// Add Event Listeners to all the "read?"" options
+function updateReadOpt() {
+    for (const option of selectOptions) {
+        if (!option.hasAttribute("anexed")) { //This check and attribute is used to avoid add double event listeners (when pre-existing library is anexed and a book is created)
+            option.addEventListener("change", (event) => {
+                myLibrary[event.target.getAttribute("index")].markAsRead();
+                event.target.setAttribute("anexed", "yes");
+                console.log("Book Changed: ");
+                console.log(myLibrary[event.target.getAttribute("index")]);
+            });
+        };
+    };
+};
+
 
 // "Add book to the shelve" button opens the dialog
 showButton.addEventListener("click", () => {
@@ -112,23 +176,4 @@ confirmButton.addEventListener("click", (event) => {
     dialog.close();
 });
 
-// To Delete a Book
-function updateDelBook() { // Required so we can update the event listener to all the created buttons
-    const deleteBtn = document.getElementsByClassName("deleteBtn");
-
-    for (const button of deleteBtn) {
-        button.addEventListener("click", () => {
-            myLibrary.splice(+button.getAttribute("value"), 1);
-
-            const deleteDiv = document.getElementById(button.getAttribute("value")); //Select the div to delete
-            document.getElementsByClassName("shelve")[0].removeChild(deleteDiv); //Delete div from the DOM tree
-            alert("Book deleted successfully")
-
-
-            console.log("Book deleted successfully");
-            console.log("This is your library ");
-            console.log(myLibrary);
-        })
-    };
-};
 
