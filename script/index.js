@@ -1,5 +1,6 @@
 // Basic variables definitions
 const myLibrary = [];
+let id = 0;
 
 function Book (title, author, pages, year, read = false) {
     this.title = title;
@@ -7,8 +8,9 @@ function Book (title, author, pages, year, read = false) {
     this.pages = pages;
     this.year = year;
     this.read = read;
-
     //Add unique identifier
+    this.id = id;
+    id++;
 };
 
 myLibrary.push(new Book("A Master of Djinn", "P.Djeli Clark", 356, 2000, false));
@@ -35,12 +37,13 @@ function addBookToDoom(book, index) {
     book_pages = book["pages"];
     book_year = book["year"];
     book_read = book["read"];
+    book_id = book["id"];
 
     const shelve = document.getElementsByClassName("shelve")[0]; // HTMLCollection array, we only want the first element
 
     const div = document.createElement("div");
     div.classList.add("book");
-    div.setAttribute("id", index);
+    div.setAttribute("id", book_id);
 
     const title = document.createElement("h2");
     title.classList.add("book_title");
@@ -61,7 +64,7 @@ function addBookToDoom(book, index) {
 
     const readOption = document.createElement("select");
     readOption.setAttribute("name", "selectOptions");
-    readOption.setAttribute("index", index);
+    readOption.setAttribute("index", book_id);
 
     const yesRead = document.createElement("option");
     yesRead.setAttribute("value", "Yes");
@@ -126,19 +129,27 @@ function updateDelBook() { // Required so we can update the event listener to al
     for (const button of deleteBtn) {
         if (!button.hasAttribute("anexed")) { //This check an attribute used to avoid adding double event listeners (when pre-existing library is anexed and a book is created)
             button.setAttribute("anexed", true);
+
             button.addEventListener("click", (event) => {
                 const deleteDiv = event.target.parentNode;
+
+                //Find the correct object to delete inside MyLibrary
+                myLibrary.map(
+                    (value, index) => {
+                        if (value["id"]==event.target.parentNode.getAttribute("id")) {
+                            myLibrary.splice(index, 1);
+                        }
+                    }
+                );
+
+                // Remove book from the DOM tree
                 document.getElementsByClassName("shelve")[0].removeChild(deleteDiv);
 
-                // myLibrary.splice(+button.getAttribute("value"), 1); //Delete the node in the myLibrary array of Books objects
-                // console.log(myLibrary);
-                // const deleteDiv = document.getElementById(button.getAttribute("value")); //Select the div to delete
-                // console.log(deleteDiv);
+                // Alert the user
                 alert("Book deleted successfully")
-                // console.log("Book deleted successfully");
+                console.log("Book deleted successfully");
             });
         };
-
     };
 };
 
@@ -146,11 +157,22 @@ function updateDelBook() { // Required so we can update the event listener to al
 function updateReadOpt() {
     for (const option of selectOptions) {
         if (!option.hasAttribute("anexed")) { //This check an attribute used to avoid adding double event listeners (when pre-existing library is anexed and a book is created)
+            option.setAttribute("anexed", true) // Set an attribute to avoid double adding event listeners
+
             option.addEventListener("change", (event) => {
-                myLibrary[event.target.getAttribute("index")].markAsRead();
-                event.target.setAttribute("anexed", "yes");
-                console.log("Book Changed: ");
-                console.log(myLibrary[event.target.getAttribute("index")]);
+
+                //Find the correct object to modify inside MyLibrary
+                myLibrary.map(
+                    (value, index) => {
+                        if (value["id"]==event.target.parentNode.parentNode.getAttribute("id")) {
+                            myLibrary[index].markAsRead();
+
+                            // Alert the User
+                            console.log("Book Changed: ");
+                            console.log(myLibrary[event.target.getAttribute("index")]);
+                        }
+                    }
+                );
             });
         };
     };
